@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Improved Mobile Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(to right, #4e54c8, #8f94fb); /* Gradient background */
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+        }
+
+        #menu {
+            text-align: center;
+        }
+
+        /* Use Arial font for the SpeedX text */
+        #menu h1 {
+            font-family: 'Arial', sans-serif;
+            font-size: 36px;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+
+        #startButton,
+        #settingsButton,
+        #achievementsButton,
+        #gamemodesButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 20px;
+            cursor: pointer;
+            background-color: rgb(51, 51, 51);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+
+
+        canvas {
+            border: 2px solid #333;
+            touch-action: none;
+        }
+        .slider {
+            position: absolute;
+            bottom: 20px;
+            left: 5vw;
+            width: 90vw;
+            height: 1000px;
+            background-color: #dddddd00;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        #score {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        /* Improved styles for the settings overlay */
+        #settingsOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        #settingsContainer {
+            font-family: 'Arial', sans-serif; /* Use Arial font */
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+            width: 80%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-size: 16px;
+            color: #fff;
+        }
+
+        input[type="range"],
+        input[type="color"] {
+            width: 100%;
+            margin-top: 8px;
+            padding: 6px;
+            border: none;
+            background-color: #444;
+            border-radius: 4px;
+            color: #fff;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 24px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #5cb85c; /* Green color */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #4cae4c; /* Darker green on hover */
+        }
+
+        #closeSettings {
+            margin-top: 10px;
+            background-color: #d9534f; /* Red color for close button */
+        }
+
+        #closeSettings:hover {
+            background-color: #c9302c; /* Darker red on hover */
+        }
+
+        /* Font smoothing */
+        body {
+            font-smooth: always;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        #achievementsOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        #achievementsContainer {
+            background: #222;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        .achievement {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: rgb(51, 51, 51);
+            color: #fff;
+            border-radius: 5px;
+        }
+
+        #closeAchievements {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: rgb(51, 51, 51);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+
+        /* New styles for the game modes overlay */
+        #gameModesOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        #gameModesContainer {
+            background: #222;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        .game-mode {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: rgb(51, 51, 51);
+            color: #fff;
+            border-radius: 5px;
+        }
+
+        #closeGameModes {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: rgb(51, 51, 51);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+
+        /* Additional styles for character customization */
+        #characterColorLabel {
+            margin-top: 10px;
+        }
+
+        #characterColorPicker {
+            margin-top: 5px;
+        }
+
+        #gameOverOverlay {
+            display: none;
+            position: absolute; /* Use absolute positioning */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(156, 25, 25, 0.842);
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+        
+        #gameOverText {
+            text-align: center;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="menu">
+        <h1>SpeedX</h1>
+        <button id="startButton">Başlat</button>
+        <button id="settingsButton">Ayarlar</button>
+        <button id="achievementsButton">Başarımlar</button>
+        <button id="gamemodesButton">Oyun Modları</button>
+        <div id="achievementNotification" style="display: none;"></div> <!-- New line for achievement notification -->
+        <div id="highestScore">En yüksek skor: 0</div>
+    </div>
+
+    <canvas id="gameCanvas" width="400" height="400" style="display: none;"></canvas>
+    <div id="slider" class="slider" style="display: none;"></div>
+    <div id="score" style="display: none;">Skor: 0</div>
+
+    <div id="settingsOverlay">
+        <div id="settingsContainer">
+            <h2>Ayarlar</h2>
+            <label for="gameSpeed">Oyun Hızı:</label>
+            <input type="range" id="gameSpeed" min="1" max="5" step="1" value="1">
+            <label for="obstacleSpeed">Engel Hızı:</label>
+            <input type="range" id="obstacleSpeed" min="1" max="10" step="1" value="5">
+            <label for="characterColor">Karakter Rengi:</label>
+            <input type="color" id="characterColor" value="#00F">
+            <button id="applySettings">Uygula</button>
+            <button id="closeSettings">Kapat</button>
+        </div>
+    </div>
+
+    <!-- Achievements Overlay -->
+    <div id="achievementsOverlay">
+        <div id="achievementsContainer">
+            <h2>Başarımlar</h2>
+            <div class="achievement">
+                <h3>Başarı 1:</h3>
+                <p>Bu yazıyı okuyorsan sen bir eziksin.</p>
+            </div>
+            <!-- Add more achievements as needed -->
+            <button id="closeAchievements">Close</button>
+        </div>
+    </div>
+
+    <!-- Oyun Modları açılır penceresi -->
+    <div id="gameModesOverlay">
+        <div id="gameModesContainer">
+            <h2>Oyun Modları</h2>
+            <div class="game-mode">
+                <h3>Klasik Mod</h3>
+                <p>Standart kurallara sahip olan orijinal oyun modu.</p>
+            </div>
+            <div class="game-mode">
+                <h3>Zaman Saldırısı</h3>
+                <p>Belirli bir süre içinde mümkün olan en yüksek puanı elde et!</p>
+            </div>
+            <!-- İhtiyaca göre daha fazla oyun modu ekleyebilirsiniz -->
+            <button id="closeGameModes">Kapat</button>
+        </div>
+    </div>
+
+    <!-- Game Over Overlay -->
+    <div id="gameOverOverlay">
+        <div id="gameOverText">
+            <h2>Kaybettin!</h2>
+            <p id="finalScore">Skor: 0</p>
+            <button id="returnToMainMenuButton">Ana menüye dön</button>
+        </div>
+    </div>
+
+    <!-- Audio elements for sound effects -->
+    <audio id="collisionSound" src="./collision.mp3"></audio>
+    <audio id="powerUpSound" src="./power_up2.mp3"></audio>
+
+
+    <script>
+    var achievements = [];
+    loadAchievements();
+    var playerAchievedSomething = false;
+    var highestScore = localStorage.getItem('highestScore') || 0;
+
+    var highestScoreElement = document.getElementById("highestScore");
+    highestScoreElement.textContent = "En yüksek skor: " + highestScore;
+
+    var closeAchievementsButtons = document.querySelectorAll("#closeAchievements");
+    closeAchievementsButtons.forEach(function(button) {
+        button.addEventListener("click", closeAchievements);
+    });
+
+    function closeAchievements() {
+        // Hide the achievements overlay
+        document.getElementById("achievementsOverlay").style.display = "none";
+    }
+    // Add a function to check and load achievements from localStorage
+    function loadAchievements() {
+        var savedAchievements = localStorage.getItem('achievements');
+        if (savedAchievements) {
+            achievements = JSON.parse(savedAchievements);
+        }
+    }
+
+    function playCollisionSound() {
+        var collisionSound = document.getElementById("collisionSound");
+        collisionSound.play();
+    }
+    
+    function playPowerUpSound() {
+        var powerUpSound = document.getElementById("powerUpSound");
+        powerUpSound.play();
+    }
+
+    // Add a function to save achievements to localStorage
+    function saveAchievements() {
+        localStorage.setItem('achievements', JSON.stringify(achievements));
+    }
+
+    var returnToMainMenuButton = document.getElementById("returnToMainMenuButton");
+    returnToMainMenuButton.addEventListener("click", function() {
+        location.reload(); // Reload the page
+    });
+
+    function returnToMainMenu() {
+        // Add logic to return to the main menu (e.g., show the main menu and hide the game-over overlay)
+    }
+
+    var characterColorPicker = document.getElementById("characterColor");
+    characterColorPicker.addEventListener("input", updateCharacterColor);
+
+    function updateCharacterColor() {
+        var newColor = characterColorPicker.value;
+        playerColor = newColor;
+        // You can apply the new color to the player's appearance here
+        // For example: player.style.backgroundColor = newColor;
+    }
+        var gameModesButton = document.getElementById("gamemodesButton");
+        gameModesButton.addEventListener("click", openGameModes);
+
+        var closeGameModesButton = document.getElementById("closeGameModes");
+        closeGameModesButton.addEventListener("click", closeGameModes);
+
+        function openGameModes() {
+            // Show the game modes overlay
+            document.getElementById("gameModesOverlay").style.display = "flex";
+        }
+
+        function closeGameModes() {
+            // Hide the game modes overlay
+            document.getElementById("gameModesOverlay").style.display = "none";
+        }
+
+        var achievementsButton = document.getElementById("achievementsButton");
+        achievementsButton.addEventListener("click", openAchievements);
+
+        var closeAchievementsButton = document.getElementById("closeAchievements");
+        closeAchievementsButton.addEventListener("click", closeAchievements);
+
+        function openAchievements() {
+            // Show the achievements overlay
+            document.getElementById("achievementsOverlay").style.display = "flex";
+
+            var achievementsContainer = document.getElementById("achievementsContainer");
+            achievementsContainer.innerHTML = "<h2>Başarımlar</h2>";
+            for (var i = 0; i < achievements.length; i++) {
+                var achievementElement = document.createElement("div");
+                achievementElement.classList.add("achievement");
+                achievementElement.innerHTML = "<h3>" + achievements[i] + "</h3>";
+                achievementsContainer.appendChild(achievementElement);
+            }
+
+            // ... (other code)
+        }
+
+        function openAchievements() {
+            // Show the achievements overlay
+            document.getElementById("achievementsOverlay").style.display = "flex";
+
+            var achievementNotification = document.getElementById("achievementNotification");
+            if (playerAchievedSomething) {
+                achievementNotification.textContent = "Bir başarım kazandın!";
+                achievementNotification.style.display = "block";
+            } else {
+                achievementNotification.style.display = "none";
+            }
+        }
+
+        var settingsButton = document.getElementById("settingsButton");
+        settingsButton.addEventListener("click", openSettings);
+
+        var applySettingsButton = document.getElementById("applySettings");
+        applySettingsButton.addEventListener("click", applySettings);
+
+        var closeSettingsButton = document.getElementById("closeSettings");
+        closeSettingsButton.addEventListener("click", closeSettings);
+
+        function openSettings() {
+            // Show the settings overlay
+            document.getElementById("settingsOverlay").style.display = "flex";
+        }
+
+        function applySettings() {
+            // Apply the selected settings
+            var gameSpeed = document.getElementById("gameSpeed").value;
+            var obstacleSpeed = document.getElementById("obstacleSpeed").value;
+
+            // Update the game configuration with the new values
+            config.game.speed = parseInt(gameSpeed);
+            config.obstacle.speed = parseInt(obstacleSpeed);
+
+            closeSettings();
+        }
+
+        function closeSettings() {
+            // Hide the settings overlay
+            document.getElementById("settingsOverlay").style.display = "none";
+        }
+
+        var gameActive = false;
+
+        // Configuration Section
+        var config = {
+            game: {
+                speed: 1,
+            },
+            obstacle: {
+                speed: 5,
+                size: 20,
+            },
+            powerUp: {
+                speed: 3,
+                size: 20,
+                color: "#FFD700", // Yellow color for power-ups
+                effects: [
+                    { name: "Speed Up", value: 2 },     // Double player speed
+                    { name: "Slow Down", value: 0.5 },  // Halve player speed
+                    { name: "Double Score", value: 1 }, // Double score
+                    { name: "Invert Controls", value: 1 }, // Invert player controls
+                    { name: "Clear Obstacles", value: 1 }, // Clear all obstacles on screen
+                ],
+            },
+        };
+
+        var particles = [];
+
+        function createParticles(x, y, color) {
+            for (var i = 0; i < 10; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    size: 5,
+                    color: color,
+                    alpha: 1, // Initial opacity
+                    speed: Math.random() * 2 + 1, // Random speed for particles
+                    angle: Math.random() * Math.PI * 2, // Random angle for particle direction
+                });
+            }
+        }
+
+        function updateParticles() {
+            for (var i = 0; i < particles.length; i++) {
+                particles[i].x += Math.cos(particles[i].angle) * particles[i].speed;
+                particles[i].y += Math.sin(particles[i].angle) * particles[i].speed;
+                particles[i].alpha -= 0.02; // Gradually decrease opacity
+            }
+    
+            particles = particles.filter(particle => particle.alpha > 0); // Remove faded particles
+        }
+    
+        function drawParticles() {
+            for (var i = 0; i < particles.length; i++) {
+                ctx.globalAlpha = particles[i].alpha;
+                ctx.fillStyle = particles[i].color;
+                ctx.fillRect(particles[i].x, particles[i].y, particles[i].size, particles[i].size);
+            }
+    
+            ctx.globalAlpha = 1; // Reset global alpha
+        }
+    
+        var canvas = document.getElementById("gameCanvas");
+        var ctx = canvas.getContext("2d");
+        var player = { x: canvas.width / 2, y: canvas.height - 30, size: 20, speed: 1 };
+        var obstacles = [];
+        var powerUps = [];
+        var score = 0;
+        var gameOverOverlay = document.getElementById("gameOverOverlay");
+        var finalScoreDisplay = document.getElementById("finalScore");  
+
+        var menu = document.getElementById("menu");
+        var startButton = document.getElementById("startButton");
+        var gameCanvas = document.getElementById("gameCanvas");
+        var slider = document.getElementById("slider");
+        var scoreDisplay = document.getElementById("score");
+
+        slider.addEventListener("touchstart", handleTouchStart);
+        slider.addEventListener("touchmove", handleTouchMove);
+
+        var keys = {};
+        window.addEventListener("keydown", function (e) {
+            keys[e.key] = true;
+        });
+
+        window.addEventListener("keyup", function (e) {
+            keys[e.key] = false;
+        });
+
+        function handleTouchStart(event) {
+            event.preventDefault();
+            handleSliderMove(event.touches[0]);
+        }
+
+        function handleTouchMove(event) {
+            event.preventDefault();
+            handleSliderMove(event.touches[0]);
+        }
+
+    slider.addEventListener("touchstart", handleSliderStart);
+    slider.addEventListener("touchmove", handleSliderMove);
+    slider.addEventListener("touchend", handleSliderEnd);
+    slider.addEventListener("mousedown", handleSliderStart);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleSliderEnd);
+
+    var isSliderDragging = false;
+
+    function handleSliderStart(event) {
+        event.preventDefault();
+        isSliderDragging = true;
+        handleSliderMove(event);
+    }
+
+    startButton.addEventListener("click", startGame);
+
+    function startGame() {
+
+        gameActive = true;
+    
+        menu.style.display = "none";
+        gameCanvas.style.display = "block";
+        slider.style.display = "block";
+        scoreDisplay.style.display = "block";
+
+        resetGame();
+
+        slider.addEventListener("touchstart", handleTouchStart);
+        slider.addEventListener("touchmove", handleTouchMove);
+
+        window.addEventListener("keydown", function (e) {
+            keys[e.key] = true;
+        });
+    
+        window.addEventListener("keyup", function (e) {
+            keys[e.key] = false;
+        });
+
+        gameLoop();
+    }   
+
+    function gameOver() {
+        gameActive = false;
+        gameOverOverlay.style.display = "flex";
+        finalScoreDisplay.textContent = "Skor: " + Math.floor(score);
+
+        scoreDisplay.style.display = "none";
+
+        if (score > highestScore) {
+            highestScore = Math.floor(score);
+            highestScoreElement.textContent = "Highest Score: " + highestScore;
+
+            localStorage.setItem('highestScore', highestScore);
+        }
+    }
+
+    returnToMainMenuButton.addEventListener("click", function () {
+
+        scoreDisplay.style.display = "block";
+        location.reload(); // Reload the page
+    });
+        
+
+    function handleSliderMove(event) {
+        if (isSliderDragging) {
+            var sliderRect = slider.getBoundingClientRect();
+            var mouseX = event.clientX || event.touches[0].clientX;
+            var sliderValue = Math.min(100, Math.max(0, ((mouseX - sliderRect.left) / sliderRect.width) * 100));
+
+            var newX = (canvas.width - player.size) * (sliderValue / 100);
+            player.x = Math.max(0, Math.min(canvas.width - player.size, newX));
+        }
+    }
+
+    function handleMouseMove(event) {
+        handleSliderMove(event);
+    }
+
+    function handleSliderEnd() {
+        isSliderDragging = false;
+
+    }
+
+    function gameLoop() {
+        if (!menu.style.display || menu.style.display === "none") {
+
+            handleKeys();
+            update();
+            draw();
+            updateParticles();
+            drawParticles();
+            requestAnimationFrame(gameLoop);
+        } else {
+            requestAnimationFrame(gameLoop);
+        }
+    }
+
+        function handleKeys() {
+            if (keys["a"] || keys["A"]) {
+                player.speed = -1; // Move left
+            } else if (keys["d"] || keys["D"]) {
+                player.speed = 1; // Move right
+            } else {
+                player.speed = 0; // Stop moving if no key is pressed
+            }
+        }
+
+        function update() {
+            if (gameActive) {
+
+                if (Math.random() < 0.02 * config.game.speed) {
+                    var obstacleX = Math.random() * (canvas.width - config.obstacle.size);
+                    obstacles.push({ x: obstacleX, y: 0, size: config.obstacle.size, speed: config.obstacle.speed });
+                }
+
+                if (Math.random() < 0.01 * config.game.speed) {
+                    var powerUpX = Math.random() * (canvas.width - config.powerUp.size);
+                    var randomEffect = config.powerUp.effects[Math.floor(Math.random() * config.powerUp.effects.length)];
+                    powerUps.push({ x: powerUpX, y: 0, size: config.powerUp.size, speed: config.powerUp.speed, effect: randomEffect });
+                }
+
+                for (var i = 0; i < obstacles.length; i++) {
+                    obstacles[i].y += obstacles[i].speed * config.game.speed;
+                    if (checkCollision(player, obstacles[i])) {
+                        gameOver(); 
+                    }
+                }
+
+                for (var i = 0; i < powerUps.length; i++) {
+                    powerUps[i].y += powerUps[i].speed * config.game.speed;
+                    if (checkCollision(player, powerUps[i])) {
+                        applyPowerUpEffect(powerUps[i].effect);
+                        createParticles(powerUps[i].x, powerUps[i].y, config.powerUp.color);
+                        powerUps.splice(i, 1);
+                        i--; 
+                        score += 5 * config.game.speed;
+                        scoreDisplay.textContent = "Score: " + Math.floor(score);
+
+                        if (score >= 100 && !playerAchievedSomething) {
+                            playerAchievedSomething = true;
+
+                            achievements.push("Achievement 1");
+
+                            saveAchievements();
+                        }
+                    }
+                }
+
+                obstacles = obstacles.filter(obstacle => obstacle.y > 0);
+
+                powerUps = powerUps.filter(powerUp => powerUp.y < canvas.height);
+            }
+        }
+
+        function applyPowerUpEffect(effect) {
+            switch (effect.name) {
+                case "Speed Up":
+                    player.speed *= effect.value;
+                    break;
+                case "Slow Down":
+                    player.speed /= effect.value;
+                    break;
+                case "Double Score":
+                    score *= effect.value;
+                    break;
+                case "Invert Controls":
+                    player.speed *= -1;
+                    break;
+                case "Clear Obstacles":
+                    obstacles = [];
+                    break;
+                default:
+                    break;
+
+
+        createExplosionParticles(powerUps[i].x + powerUps[i].size / 2, powerUps[i].y + powerUps[i].size / 2, config.powerUp.color);
+            }
+
+            createParticles(player.x + player.size / 2, player.y + player.size / 2, config.powerUp.color);
+        }
+
+        function createExplosionParticles(x, y, color) {
+            for (var i = 0; i < 20; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    size: Math.random() * 8 + 4, // Random size for particles
+                    color: color,
+                    alpha: 1, // Initial opacity
+                    speed: Math.random() * 5 + 1, // Random speed for particles
+                    angle: Math.random() * Math.PI * 2, // Random angle for particle direction
+                });
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "#00F";
+            ctx.fillRect(player.x, player.y, player.size, player.size);
+
+            ctx.fillStyle = "#F00";
+            for (var i = 0; i < obstacles.length; i++) {
+                ctx.fillRect(obstacles[i].x, obstacles[i].y, obstacles[i].size, obstacles[i].size);
+            }
+
+            ctx.fillStyle = config.powerUp.color;
+            for (var i = 0; i < powerUps.length; i++) {
+                ctx.fillRect(powerUps[i].x, powerUps[i].y, powerUps[i].size, powerUps[i].size);
+            }
+        }
+
+        function checkCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.size &&
+                rect1.x + rect1.size > rect2.x &&
+                rect1.y < rect2.y + rect2.size &&   
+                rect1.y + rect1.size > rect2.y;
+        drawParticles()
+        }
+
+        function resetGame() {
+            player.x = canvas.width / 2;
+            obstacles = [];
+            powerUps = [];
+            score = 0;
+            config.game.speed = 1;
+            config.obstacle.speed = 5;
+            config.obstacle.size = 20;
+            player.speed = 1;
+        }
+
+        gameLoop();
+    </script>
+</body>
+    </html>
