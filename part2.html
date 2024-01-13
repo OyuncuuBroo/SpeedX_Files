@@ -1,0 +1,238 @@
+
+<canvas id="gameCanvas" width="400" height="400" style="display: none;"></canvas>
+<div id="slider" class="slider" style="display: none;"></div>
+<div id="score" style="display: none;">Skor: 0</div>
+
+<div id="settingsOverlay">
+    <div id="settingsContainer">
+        <h2>Ayarlar</h2>
+        <label for="gameSpeed">Oyun Hızı:</label>
+        <input type="range" id="gameSpeed" min="1" max="5" step="1" value="1">
+        <label for="obstacleSpeed">Engel Hızı:</label>
+        <input type="range" id="obstacleSpeed" min="1" max="10" step="1" value="5">
+        <label for="characterColor">Karakter Rengi:</label>
+        <input type="color" id="characterColor" value="#00F">
+        <button id="applySettings">Uygula</button>
+        <button id="closeSettings">Kapat</button>
+    </div>
+</div>
+
+<!-- Achievements Overlay -->
+<div id="achievementsOverlay">
+    <div id="achievementsContainer" class="overlay-container">
+        <h2>Başarımlar</h2>
+        <div class="achievement">
+            <h3>Başarı 1:</h3>
+            <p>Bu yazıyı okuyorsan sen bir eziksin.</p>
+        </div>
+        <!-- Add more achievements as needed -->
+        <button id="closeAchievements">Kapat</button>
+    </div>
+</div>
+
+<!-- Oyun Modları açılır penceresi -->
+<div id="gameModesOverlay">
+    <div id="gameModesContainer">
+        <h2>Oyun Modları</h2>
+        <div class="game-mode">
+            <h3>Klasik Mod</h3>
+            <p>Standart kurallara sahip olan orijinal oyun modu.</p>
+        </div>
+        <div class="game-mode">
+            <h3>Zaman Saldırısı</h3>
+            <p>Belirli bir süre içinde mümkün olan en yüksek puanı elde et!</p>
+        </div>
+        <!-- İhtiyaca göre daha fazla oyun modu ekleyebilirsiniz -->
+        <button id="closeGameModes">Kapat</button>
+    </div>
+</div>
+
+<!-- Game Over Overlay -->
+<div id="gameOverOverlay">
+    <div id="gameOverText">
+        <h2>Kaybettin!</h2>
+        <p id="finalScore">Skor: 0</p>
+        <button id="returnToMainMenuButton">Ana menüye dön</button>
+    </div>
+</div>
+
+<audio id="collisionSound" src="collision.mp3" type="audio/mp3"></audio>
+<audio id="powerUpSound" src="powerup.wav" type="audio/mp3"></audio>
+
+<script>
+    var player = { x: 0, y: 0, size: 20, speed: 1};
+
+    var canvas = document.getElementById("gameCanvas");
+    var ctx = canvas.getContext("2d");
+
+// Add a new element for the player
+var playerElement = document.createElement("div");
+playerElement.id = "player";
+document.body.appendChild(playerElement);  
+
+var player = { x: canvas.width / 2, y: canvas.height - 30, size: 20, speed: 1, color:   "#00F" };
+
+var achievements = [];
+var playerColor = "#00F";
+var characterColorPicker = document.getElementById("characterColor");
+characterColorPicker.addEventListener("input", updateCharacterColor);    
+loadAchievements();
+var playerAchievedSomething = false;
+var highestScore = localStorage.getItem('highestScore') || 0;  
+
+var highestScoreElement = document.getElementById("highestScore");
+highestScoreElement.textContent = "En yüksek skor: " + highestScore;
+
+var closeAchievementsButtons = document.querySelectorAll("#closeAchievements");
+closeAchievementsButtons.forEach(function(button) {
+    button.addEventListener("click", closeAchievements);
+});
+
+function closeAchievements() {
+    // Hide the achievements overlay
+    document.getElementById("achievementsOverlay").style.display = "none";
+}
+function loadAchievements() {
+    var savedAchievements = localStorage.getItem('achievements');
+    if (savedAchievements) {
+        achievements = JSON.parse(savedAchievements);
+    }
+}
+
+
+// Add a function to save achievements to localStorage
+function saveAchievements() {
+    localStorage.setItem('achievements', JSON.stringify(achievements));
+}
+
+var returnToMainMenuButton = document.getElementById("returnToMainMenuButton");
+returnToMainMenuButton.addEventListener("click", function() {
+    location.reload(); // Reload the page
+});
+
+function returnToMainMenu() {
+}
+
+    var gameModesButton = document.getElementById("gamemodesButton");
+    gameModesButton.addEventListener("click", openGameModes);
+
+    var closeGameModesButton = document.getElementById("closeGameModes");
+    closeGameModesButton.addEventListener("click", closeGameModes);
+
+    function openGameModes() {
+        // Show the game modes overlay
+        document.getElementById("gameModesOverlay").style.display = "flex";
+    }
+
+    function closeGameModes() {
+        // Hide the game modes overlay
+        document.getElementById("gameModesOverlay").style.display = "none";
+    }
+
+    var achievementsButton = document.getElementById("achievementsButton");
+    achievementsButton.addEventListener("click", openAchievements);
+
+    var closeAchievementsButton = document.getElementById("closeAchievements");
+    closeAchievementsButton.addEventListener("click", closeAchievements);
+
+    function updateCharacterColor() {
+        var newColor = characterColorPicker.value;
+    
+        // Check if the new color is different from the current player color
+        if (newColor !== player.color) {
+            // Remove the existing player element
+            document.body.removeChild(playerElement);
+    
+            // Create a new hidden player element with the updated color
+            var newPlayerElement = document.createElement("div");
+            newPlayerElement.id = "player";
+            newPlayerElement.style.display = "none"; // Set to hidden initially
+            document.body.appendChild(newPlayerElement);
+    
+            // Update the player's color and element reference
+            player.color = newColor;
+            playerElement = newPlayerElement;
+    
+            // Update the player element's styles
+            playerElement.style.width = player.size + "px";
+            playerElement.style.height = player.size + "px";
+            playerElement.style.backgroundColor = player.color;
+    
+            // Update the position of the new player element
+            playerElement.style.left = player.x + "px";
+            playerElement.style.top = player.y + "px";
+        }
+    }
+    
+    function rgbFromHex(hex) {
+        // Ensure the hex value is a string and starts with a hash
+        hex = (typeof hex === 'string' && hex.startsWith('#')) ? hex : '#000000';
+    
+        // Remove the hash and convert to RGB
+        var bigint = parseInt(hex.substring(1), 16);
+        var r = (bigint >> 16) & 255;
+        var g = (bigint >> 8) & 255;
+        var b = bigint & 255;
+    
+        return { r: r, g: g, b: b };
+    }
+    
+    // Helper function to check if two RGB colors are equal
+    function colorsEqual(color1, color2) {
+        return color1.r === color2.r && color1.g === color2.g && color1.b === color2.b;
+    }
+            
+    function openAchievements() {
+        // Show the achievements overlay
+        var achievementsOverlay = document.getElementById("achievementsOverlay");
+        achievementsOverlay.style.display = "flex";
+    
+        var achievementContainer = document.getElementById("achievementsContainer");
+        achievementContainer.innerHTML = "<h2>Başarımlar</h2>";
+    
+        // Filter out duplicate entries
+        var uniqueAchievements = [...new Set(achievements)];
+    
+        if (uniqueAchievements.length > 0) {
+            for (var i = 0; i < uniqueAchievements.length; i++) {
+                var achievementElement = document.createElement("div");
+                achievementElement.classList.add("achievement");
+                achievementElement.innerHTML = "<h3>" + uniqueAchievements[i] + "</h3>";
+                achievementContainer.appendChild(achievementElement);
+            }
+        } else {
+            var noAchievementElement = document.createElement("div");
+            noAchievementElement.textContent = "Henüz bir başarı kazanılmadı.";
+            achievementContainer.appendChild(noAchievementElement);
+        }
+    
+        // Append the close button inside the menu
+        var closeButton = document.createElement("button");
+        closeButton.id = "closeSettings";
+        closeButton.textContent = "Kapat";
+        closeButton.addEventListener("click", closeAchievements);
+        achievementContainer.appendChild(closeButton);
+    
+        var achievementNotification = document.getElementById("achievementNotification");
+        if (playerAchievedSomething) {
+            achievementNotification.textContent = "Bir başarım kazandın!";
+            achievementNotification.style.display = "block";
+        } else {
+            achievementNotification.style.display = "none";
+        }
+    }       
+    
+    var settingsButton = document.getElementById("settingsButton");
+    settingsButton.addEventListener("click", openSettings);
+    
+    var applySettingsButton = document.getElementById("applySettings");
+    applySettingsButton.addEventListener("click", applySettings);
+    
+    var closeSettingsButton = document.getElementById("closeSettings");
+    closeSettingsButton.addEventListener("click", closeSettings);
+
+    function openSettings() {
+        // Show the settings overlay and set the color picker value to the current player color
+        document.getElementById("settingsOverlay").style.display = "flex";
+        characterColorPicker.value = playerColor;
+    }

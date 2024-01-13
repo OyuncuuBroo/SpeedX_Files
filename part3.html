@@ -1,0 +1,126 @@
+        
+        // Revised applySettings function
+        function applySettings() {
+            // Apply the selected settings
+            var gameSpeedInput = document.getElementById("gameSpeed");
+            var obstacleSpeedInput = document.getElementById("obstacleSpeed");
+
+            // Validate input values (optional)
+            var gameSpeed = parseInt(gameSpeedInput.value);
+            var obstacleSpeed = parseInt(obstacleSpeedInput.value);
+
+            // Update the game configuration with the new values
+            if (!isNaN(gameSpeed)) {
+                config.game.speed = gameSpeed;
+            }
+
+            if (!isNaN(obstacleSpeed)) {
+                config.obstacle.speed = obstacleSpeed;
+            }
+
+            // Optionally, update other settings if needed
+
+            // Close the settings overlay
+            closeSettings();
+        }
+        
+        // Modify the closeSettings function to apply settings before closing
+        function closeSettings() {
+            // Hide the settings overlay
+            document.getElementById("settingsOverlay").style.display = "none";
+        }
+
+        var gameActive = false;
+
+        // Configuration Section
+        var config = {
+            game: {
+                speed: 1,
+            },
+            obstacle: {
+                speed: 5,
+                size: 20,
+            },
+            powerUp: {
+                speed: 3,
+                size: 20,
+                color: "#FFD700", // Yellow color for power-ups
+                effects: [
+                    { name: "Speed Up", value: 2 },     // Double player speed
+                    { name: "Slow Down", value: 0.5 },  // Halve player speed
+                    { name: "Double Score", value: 1 }, // Double score
+                    { name: "Invert Controls", value: 1 }, // Invert player controls
+                    { name: "Clear Obstacles", value: 1 }, // Clear all obstacles on screen
+                ],
+            },
+        };
+
+        var particles = [];
+
+        function createParticles(x, y, color) {
+            for (var i = 0; i < 10; i++) {
+                particles.push({
+                    x: x + playerElement.clientWidth / 2,
+                    y: y + playerElement.clientHeight / 2,
+                    size: 5,
+                    color: color,
+                    alpha: 1,
+                    speed: Math.random() * 2 + 1,
+                    angle: Math.random() * Math.PI * 2,
+                });
+            }
+        }
+
+        function updateParticles() {
+            for (var i = 0; i < particles.length; i++) {
+                particles[i].x += Math.cos(particles[i].angle) * particles[i].speed;
+                particles[i].y += Math.sin(particles[i].angle) * particles[i].speed;
+                particles[i].alpha -= 0.02; // Gradually decrease opacity
+            }
+    
+            particles = particles.filter(particle => particle.alpha > 0); // Remove faded particles
+        }
+    
+        function drawParticles() {
+            for (var i = 0; i < particles.length; i++) {
+                ctx.globalAlpha = particles[i].alpha;
+                ctx.fillStyle = particles[i].color;
+                ctx.fillRect(particles[i].x, particles[i].y, particles[i].size, particles[i].size);
+            }
+    
+            ctx.globalAlpha = 1; // Reset global alpha
+        }
+    
+        var player = { x: canvas.width / 2, y: canvas.height - 30, size: 20, speed: 1 };
+        var obstacles = [];
+        var powerUps = [];
+        var score = 0;
+        var gameOverOverlay = document.getElementById("gameOverOverlay");
+        var finalScoreDisplay = document.getElementById("finalScore");  
+
+        var menu = document.getElementById("menu");
+        var startButton = document.getElementById("startButton");
+        var gameCanvas = document.getElementById("gameCanvas");
+        var slider = document.getElementById("slider");
+        var scoreDisplay = document.getElementById("score");
+
+        slider.addEventListener("input", handleSliderMove);
+
+        var keys = {};
+        window.addEventListener("keydown", function (e) {
+            keys[e.key] = true;
+        });
+
+        window.addEventListener("keyup", function (e) {
+            keys[e.key] = false;
+        });
+
+        function handleTouchStart(event) {
+            event.preventDefault();
+            handleSliderMove(event.touches[0]);
+        }
+
+        function handleTouchMove(event) {
+            event.preventDefault();
+            handleSliderMove(event.touches[0]);
+        }

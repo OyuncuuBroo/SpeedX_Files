@@ -1,0 +1,97 @@
+slider.addEventListener("touchstart", handleSliderStart);
+slider.addEventListener("touchmove", handleSliderMove);
+slider.addEventListener("touchend", handleSliderEnd);
+slider.addEventListener("mousedown", handleSliderStart);
+window.addEventListener("mousemove", handleMouseMove);
+window.addEventListener("mouseup", handleSliderEnd);
+
+var isSliderDragging = false;
+
+function handleSliderStart(event) {
+    event.preventDefault();
+    isSliderDragging = true;
+    handleSliderMove(event);
+}
+
+startButton.addEventListener("click", startGame);
+
+function startGame() {
+
+    gameActive = true;
+
+    menu.style.display = "none";
+    gameCanvas.style.display = "block";
+    slider.style.display = "block";
+    scoreDisplay.style.display = "block";
+
+    resetGame();
+
+    slider.addEventListener("touchstart", handleTouchStart);
+    slider.addEventListener("touchmove", handleTouchMove);
+
+    window.addEventListener("keydown", function (e) {
+        keys[e.key] = true;
+    });
+
+    window.addEventListener("keyup", function (e) {
+        keys[e.key] = false;
+    });
+
+    gameLoop();
+}   
+
+function gameOver() {
+    gameActive = false;
+    gameOverOverlay.style.display = "flex";
+    finalScoreDisplay.textContent = "Skor: " + Math.floor(score);
+
+    scoreDisplay.style.display = "none";
+
+    if (score > highestScore) {
+        highestScore = Math.floor(score);
+        highestScoreElement.textContent = "Highest Score: " + highestScore;
+
+        localStorage.setItem('highestScore', highestScore);
+    }
+}
+
+returnToMainMenuButton.addEventListener("click", function () {
+
+    scoreDisplay.style.display = "block";
+    location.reload(); // Reload the page
+});
+    
+
+function handleSliderMove(event) {
+    if (isSliderDragging) {
+        var sliderRect = slider.getBoundingClientRect();
+        var mouseX = event.clientX || event.touches[0].clientX;
+        var sliderValue = Math.min(100, Math.max(0, ((mouseX - sliderRect.left) / sliderRect.width) * 100));
+
+        var newX = (canvas.width - player.size) * (sliderValue / 100);
+        player.x = Math.max(0, Math.min(canvas.width - player.size, newX));
+    }
+}
+
+function handleMouseMove(event) {
+    handleSliderMove(event);
+}
+
+function handleSliderEnd() {
+    isSliderDragging = false;
+    player.speed = 0;
+}
+
+function gameLoop() {
+    if (!menu.style.display || menu.style.display === "none") {
+
+        handleKeys();
+        update();
+        draw();
+        updateParticles();
+        drawParticles();
+        requestAnimationFrame(gameLoop);
+    } else {
+        requestAnimationFrame(gameLoop);
+    }
+}

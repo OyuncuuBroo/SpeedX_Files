@@ -1,0 +1,145 @@
+
+function handleKeys() {
+    switch (true) {
+        case keys["a"] || keys["A"]:
+            player.speed = -1; // Move left
+            break;
+        case keys["d"] || keys["D"]:
+            player.speed = 1; // Move right
+            break;
+        default:
+            player.speed = 0; // Stop moving if no key is pressed
+    }
+}    
+
+    function update() {
+        if (gameActive) {
+
+            if (Math.random() < 0.02 * config.game.speed) {
+                var obstacleX = Math.random() * (canvas.width - config.obstacle.size);
+                obstacles.push({ x: obstacleX, y: 0, size: config.obstacle.size, speed: config.obstacle.speed });
+            }
+
+            if (Math.random() < 0.01 * config.game.speed) {
+                var powerUpX = Math.random() * (canvas.width - config.powerUp.size);
+                var randomEffect = config.powerUp.effects[Math.floor(Math.random() * config.powerUp.effects.length)];
+                powerUps.push({ x: powerUpX, y: 0, size: config.powerUp.size, speed: config.powerUp.speed, effect: randomEffect });
+            }
+
+            // Update the position of the player element
+            playerElement.style.left = player.x + "px";
+            playerElement.style.top = player.y + "px";
+
+            for (var i = 0; i < obstacles.length; i++) {
+                obstacles[i].y += obstacles[i].speed * config.game.speed;
+                if (checkCollision(player, obstacles[i])) {
+                    gameOver(); 
+                }
+            }
+
+            for (var i = 0; i < powerUps.length; i++) {
+                powerUps[i].y += powerUps[i].speed * config.game.speed;
+                if (checkCollision(player, powerUps[i])) {
+                    applyPowerUpEffect(powerUps[i].effect);
+                    createParticles(powerUps[i].x, powerUps[i].y, config.powerUp.color);
+                    powerUps.splice(i, 1);
+                    i--; 
+                    score += 5 * config.game.speed;
+                    scoreDisplay.textContent = "Score: " + Math.floor(score);
+
+                }
+            }
+
+            obstacles = obstacles.filter(obstacle => obstacle.y > 0);
+
+            powerUps = powerUps.filter(powerUp => powerUp.y < canvas.height);
+        }
+    }
+
+    function applyPowerUpEffect(effect) {
+        switch (effect.name) {
+            case "Speed Up":
+                player.speed *= effect.value;
+                break;
+            case "Slow Down":
+                player.speed /= effect.value;
+                break;
+            case "Double Score":
+                score *= effect.value;
+                break;
+            case "Invert Controls":
+                player.speed *= -1;
+                break;
+            case "Clear Obstacles":
+                obstacles = [];
+                break;
+            default:
+                break;
+        }
+    
+        createExplosionParticles(player.x + player.size / 2, player.y + player.size / 2, config.powerUp.color);
+        
+        if (effect.name !== "Clear Obstacles") {
+            // Only add achievement if the effect is not "Clear Obstacles"
+            if (!achievements.includes(effect.name)) {
+                achievements.push(effect.name);
+                saveAchievements();
+                playerAchievedSomething = true;
+            }
+        }
+    }
+
+    function draw() {
+        // Update the position of the player element
+        playerElement.style.left = player.x + "px";
+        playerElement.style.top = player.y + "px";
+    
+        // Set the styles for the player element
+        playerElement.style.width = player.size + "px";
+        playerElement.style.height = player.size + "px";
+        playerElement.style.backgroundColor = player.color;
+    
+        // Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+        // Draw the player element
+        ctx.fillStyle = player.color;
+        ctx.fillRect(player.x, player.y, player.size, player.size);
+    
+        // Draw obstacles
+        ctx.fillStyle = "#F00";
+        for (var i = 0; i < obstacles.length; i++) {
+            ctx.fillRect(obstacles[i].x, obstacles[i].y, obstacles[i].size, obstacles[i].size);
+        }
+    
+        // Draw power-ups
+        ctx.fillStyle = config.powerUp.color;
+        for (var i = 0; i < powerUps.length; i++) {
+            ctx.fillRect(powerUps[i].x, powerUps[i].y, powerUps[i].size, powerUps[i].size);
+        }
+    }
+
+    function checkCollision(rect1, rect2) {
+        return (
+            rect1.x < rect2.x + rect2.size &&
+            rect1.x + rect1.size > rect2.x &&
+            rect1.y < rect2.y + rect2.size &&
+            rect1.y + rect1.size > rect2.y
+        );
+    }
+    
+    function resetGame() {
+        player.x = canvas.width / 2;
+        obstacles = [];
+        powerUps = [];
+        score = 0;
+        config.game.speed = 1;
+        config.obstacle.speed = 5;
+        config.obstacle.size = 20;
+        player.speed = 1;
+    }
+
+    gameLoop();
+</script>
+</body>
+</html>
